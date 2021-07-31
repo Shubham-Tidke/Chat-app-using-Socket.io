@@ -1,13 +1,24 @@
 const socket = io()//client sde socket implementation
 
+const $messageForm = document.querySelector('#msg-form');
+const $messageFormInput = $messageForm.querySelector('input');
+const $messageFormButton = $messageForm.querySelector('button');
+const $sendLocationButton = document.querySelector('#send-location');
+
 socket.on('message', (msg) => {
     console.log(msg);
 })
 //listening to event welcomeMsg sent by server
-document.querySelector('#msg-form').addEventListener('submit', (e) => {
+$messageForm.addEventListener('submit', (e) => {
     e.preventDefault();
+    //disbling send button to avoid resending same msg on multiple clicks
+    $messageFormButton.setAttribute('disabled', 'disabled');
     const message = e.target.elements.msg.value; //getting input message
     socket.emit('sendMessage', message)//sending event to server with input
+    //enabling the send button once previous msg is sent successfully
+    $messageFormButton.removeAttribute('disabled');
+    $messageFormInput.value = ''; //removing the msg from input
+    $messageFormInput.focus();
 })
 
 //sharing location using geolocation API 
@@ -17,10 +28,13 @@ document.querySelector('#send-location').addEventListener('click', () => {
         return alert('geolocation doesnot supported by your browser')
     navigator.geolocation.getCurrentPosition((position) => {
         //sending location to server usuing sendlocation event
+        $sendLocationButton.setAttribute('disabled', 'disabled');
         socket.emit('sendlocation', {
             latitude: position.coords.latitude,
             longitude: position.coords.longitude
+        }, () => {  //event acknowledgement using callback function
+            console.log("Location Shared Successfully!");
         })
-
+        $sendLocationButton.removeAttribute('disabled');
     })
 })
