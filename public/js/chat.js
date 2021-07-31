@@ -4,10 +4,25 @@ const $messageForm = document.querySelector('#msg-form');
 const $messageFormInput = $messageForm.querySelector('input');
 const $messageFormButton = $messageForm.querySelector('button');
 const $sendLocationButton = document.querySelector('#send-location');
+const $messages = document.querySelector('#messages');
+//templates
+const msgTemplate = document.querySelector('#msg-template').innerHTML
+const locationTemplate = document.querySelector('#location-template').innerHTML
 
 socket.on('message', (msg) => {
     console.log(msg);
+    //rendering typed messages
+    const html = Mustache.render(msgTemplate, { msg });
+    $messages.insertAdjacentHTML('beforeend', html);//adding html in div
 })
+
+//handling sending location event separately [as location link needs to be url]
+socket.on('locationMessage', (url) => {
+    console.log(url);
+    const loc = Mustache.render(locationTemplate, { url });
+    $messages.insertAdjacentHTML('beforeend', loc)
+})
+
 //listening to event welcomeMsg sent by server
 $messageForm.addEventListener('submit', (e) => {
     e.preventDefault();
